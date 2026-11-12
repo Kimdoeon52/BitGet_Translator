@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock Order Panel</title>
+<style>
+  :root { --bg:#0f1115; --panel:#181b22; --line:#2a2f3a; --fg:#e6e8ec; --mut:#8a909c; --up:#2ebd85; --down:#f6465d; --acc:#00c8d7; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:13px/1.4 system-ui, sans-serif; display:grid; grid-template-columns: 1fr 360px; min-height:100vh; }
+  main { padding:12px; display:grid; gap:12px; grid-template-columns: 320px 1fr; align-content:start; }
+  header { grid-column: 1 / -1; display:flex; gap:24px; align-items:center; background:var(--panel); padding:10px 14px; border:1px solid var(--line); border-radius:6px; flex-wrap:wrap; }
+  .pair { font-weight:700; font-size:16px; }
+  .kv { display:flex; flex-direction:column; }
+  .kv > span:first-child { color:var(--mut); font-size:11px; }
+  .up { color:var(--up); } .down { color:var(--down); }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px; }
+  .tabs { display:flex; gap:4px; margin-bottom:8px; }
+  .tabs button, .chip { background:#222733; color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:4px 10px; cursor:pointer; }
+  .tabs button.on { border-color:var(--acc); color:var(--acc); }
+  label.field { display:block; margin:8px 0 2px; color:var(--mut); }
+  input[type=text], textarea, select { width:100%; background:#10131a; color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:6px; }
+  .row { display:flex; gap:8px; align-items:center; margin:6px 0; flex-wrap:wrap; }
+  .btn { flex:1; padding:10px; border:0; border-radius:4px; color:#fff; font-weight:700; cursor:pointer; }
+  .btn.long { background:var(--up); } .btn.short { background:var(--down); }
+  .mut { color:var(--mut); }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:5px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th { color:var(--mut); font-weight:500; }
+  .box { border:1px dashed #444; padding:8px; border-radius:4px; margin-top:8px; }
+  h4 { margin:12px 0 4px; color:var(--mut); font-weight:500; }
+</style>
+</head>
+<body>
+<main>
+  <!-- 200ms마다 갱신되는 영역 -->
+  <header id="ticker">
+    <span class="pair">BTCUSDT</span>
+    <span class="chip">Futures</span>
+    <div class="kv"><span>Last Price</span><span id="last-price" class="up">65,000.0</span></div>
+    <div class="kv"><span>Mark Price</span><span id="mark-price">65,001.2</span></div>
+    <div class="kv"><span>Index Price</span><span id="index-price">64,998.7</span></div>
+    <div class="kv"><span>Funding Rate</span><span id="funding">0.0100%</span></div>
+    <div class="kv"><span>24h Change</span><span id="change" class="up">+1.23%</span></div>
+    <div class="kv"><span>24h Turnover</span><span id="turnover">1.41B</span></div>
+    <div class="kv"><span id="sfx-funding">Funding rate/Countdown (8h)</span><span>0.0100% / 03:12:45</span></div>
+  </header>
+
+  <!-- 정적 영역: 원복 시 innerHTML이 처음과 완전히 같아야 함 -->
+  <section id="static">
+    <div class="tabs" id="side-tabs"><button class="on">Open</button><button>Close</button></div>
+    <div class="row">
+      <span class="mut">Margin Mode</span>
+      <button class="chip" id="mm-cross">Cross</button>
+      <button class="chip" id="mm-isolated">Isolated</button>
+      <span class="mut">Leverage</span>
+      <span class="chip" id="leverage">20x</span>
+    </div>
+    <div class="tabs" id="type-tabs">
+      <button class="on" id="tab-limit">Limit</button>
+      <button id="tab-market">Market</button>
+      <button id="tab-trigger">Trigger</button>
+    </div>
+
+    <form id="order-form" onsubmit="return false">
+      <label class="field" for="in-price">Price</label>
+      <input type="text" id="in-price" value="65000.5">
+      <label class="field" for="in-qty">Quantity</label>
+      <input type="text" id="in-qty" placeholder="Quantity">
+
+      <div class="row">
+        <label><input type="checkbox" id="cb-tpsl"> <span id="lbl-tpsl">TP/SL</span></label>
+        <label><input type="checkbox" id="cb-reduce"> <span id="lbl-reduce">Reduce-only</span></label>
+        <label><input type="checkbox" id="cb-post"> <span>Post-only</span></label>
+      </div>
+      <div class="row"><span class="mut">Available</span><span id="available">1,234.56 USDT</span></div>
+
+      <div class="row">
+        <button type="button" class="btn long" id="btn-open-long">Open Long</button>
+        <button type="button" class="btn short" id="btn-open-short">Open Short</button>
+      </div>
+      <div class="row">
+        <button type="button" class="btn long" id="btn-buy-long">Buy/Long</button>
+        <button type="button" class="btn short" id="btn-sell-short">Sell/Short</button>
+      </div>
+      <div class="row mut">Clicks: <span id="click-count">0</span></div>
+    </form>
+
+    <h4>비간섭 대상 (절대 바뀌면 안 됨)</h4>
+    <div class="box">
+      <input type="text" id="in-market" value="Market">
+      <textarea id="ta">Long Short Limit</textarea>
+      <div id="ce" contenteditable="true">Margin</div>
+      <select id="sel"><option>Limit</option><option>Market</option></select>
+    </div>
+
+    <h4>부분 문자열은 미치환 / 쪼개진 노드는 조각 단위 처리</h4>
+    <div class="box">
+      <p id="sentence">Long position will be closed at Market price</p>
+      <button type="button" class="chip" id="split-btn">Buy <span>Long</span></button>
+    </div>
+
+    <h4>접미사 규칙: 사전키 + (심볼|숫자)만 치환</h4>
+    <div class="box">
+      <span id="sfx-price">Price (USDT)</span> ·
+      <span id="sfx-qty">Quantity(BTC)</span> ·
+      <span id="sfx-total">Total (USDT)</span> ·
+      <span id="sfx-neg1">Price (usdt)</span> ·
+      <span id="sfx-neg2">Long position (closed)</span> ·
+      <span id="sfx-neg3">Limit (UTC+8)</span>
+    </div>
+
+    <h4>숫자 단위 한국식 (차트 기간 1M·15m, 입력칸은 그대로)</h4>
+    <div class="box">
+      <span id="cp-b">1.41B</span> · <span id="cp-k">30K</span> · <span id="cp-mu">1.5M USDT</span> ·
+      <span id="cp-usd">$2.35B</span> · <span id="cp-neg">-12.3K</span> ·
+      <button type="button" class="chip" id="cp-1m">1M</button> <button type="button" class="chip" id="cp-15m">15m</button>
+      <input type="text" id="in-compact" value="1.5K" style="width:80px">
+    </div>
+
+    <h4>수집 제외 노이즈 (실제 Bitget 수집 결과에서 발췌)</h4>
+    <div class="box" id="noise">
+      <span>0.0001 rAAGIY</span> · <span>Limit: 1,000,000 USDT</span> · <span>BGUSER-1RXYTG9P</span> ·
+      <span>AUD/CAD</span> · <span>AAPLx</span> · <span>(UTC+8)</span> · <span>1 BABYDOGE</span> · <span>A</span> · <span>someone@example.com</span>
+    </div>
+  </section>
+
+  <!-- 동적 영역: React처럼 재렌더 / 행 추가 / 텍스트 교체 -->
+  <section id="dynamic">
+    <div class="tabs"><button class="on" id="tab-positions">Positions (2)</button><button id="tab-orders">Open orders (0)</button><button>Order History</button></div>
+    <table>
+      <thead><tr><th>Symbol</th><th>Size</th><th>Entry Price</th><th>Mark Price</th><th>Liq. Price</th><th>Margin</th><th>Unrealized PnL</th><th>ROE</th><th></th></tr></thead>
+      <tbody id="positions"></tbody>
+    </table>
+
+    <h4>Order History</h4>
+    <table>
+      <thead><tr><th>Symbol</th><th>Side</th><th>Price</th><th>Status</th></tr></thead>
+      <tbody id="history"></tbody>
+    </table>
+    <div class="row">
+      <span class="mut">Status toggle:</span><span id="toggle-status">Filled</span>
+    </div>
+  </section>
+</main>
+
+<aside id="harness" data-bgko-skip></aside>
+
+<script src="../src/engine.js"></script>
+<script src="mock.js"></script>
+<script src="harness.js"></script>
+</body>
+</html>

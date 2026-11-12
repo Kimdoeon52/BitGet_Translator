@@ -1,0 +1,38 @@
+:root {
+  --bg: #14171d; --panel: #1c2028; --line: #2a2f3a; --fg: #e6e8ec; --mut: #8a909c;
+  --acc: #00c8d7; --danger: #f6465d;
+}
+* { box-sizing: border-box; }
+body { margin: 0; width: 290px; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, "Malgun Gothic", sans-serif; }
+header { display: flex; align-items: baseline; justify-content: space-between; padding: 12px 14px 8px; }
+h1 { margin: 0; font-size: 15px; }
+.ver { color: var(--mut); font-size: 11px; }
+
+.toggles { padding: 0 8px; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.toggle:last-child { border-bottom: 0; }
+.toggle .txt { display: flex; flex-direction: column; }
+.toggle small { color: var(--mut); font-size: 11px; }
+.toggle.disabled { opacity: .45; }
+.toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.sw { flex: none; width: 34px; height: 20px; border-radius: 10px; background: #3a404c; position: relative; transition: background .15s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.toggle input:checked + .sw { background: var(--acc); }
+.toggle input:checked + .sw::after { transform: translateX(14px); }
+.toggle input:focus-visible + .sw { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+.collect { margin: 8px 14px; padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.count small { display: block; color: var(--mut); font-size: 11px; margin-top: 2px; }
+.buttons { display: flex; gap: 6px; margin-top: 8px; }
+button { flex: 1; padding: 7px 8px; background: #262b35; color: var(--fg); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; font: inherit; }
+button:hover:not(:disabled) { border-color: var(--acc); }
+button:disabled { opacity: .4; cursor: default; }
+button.danger:hover:not(:disabled) { border-color: var(--danger); }
+button.danger.armed { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+.dict { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 14px 8px; font-size: 12px; }
+.dict small { display: block; color: var(--mut); font-size: 11px; }
+.dict small.err { color: var(--danger); }
+.dict button { flex: none; padding: 5px 8px; font-size: 12px; }
+
+footer { padding: 4px 14px 12px; color: var(--mut); font-size: 11px; }

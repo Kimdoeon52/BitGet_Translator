@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Bitget KO</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Bitget KO</h1>
+    <span class="ver" id="ver"></span>
+  </header>
+
+  <section class="toggles">
+    <label class="toggle">
+      <span class="txt"><b>번역</b><small>끄면 즉시 원문으로 복원</small></span>
+      <input type="checkbox" id="enabled"><span class="sw"></span>
+    </label>
+    <label class="toggle" id="row-bilingual">
+      <span class="txt"><b>원문 병기</b><small>핵심 버튼: 매수/롱 (Buy/Long)</small></span>
+      <input type="checkbox" id="bilingual"><span class="sw"></span>
+    </label>
+    <label class="toggle" id="row-compact">
+      <span class="txt"><b>숫자 단위 한국식</b><small>1.41B → 14.1억, 30K → 30,000</small></span>
+      <input type="checkbox" id="compact"><span class="sw"></span>
+    </label>
+    <label class="toggle">
+      <span class="txt"><b>라벨 수집</b><small>사전에 없는 영어 라벨 기록</small></span>
+      <input type="checkbox" id="collect"><span class="sw"></span>
+    </label>
+  </section>
+
+  <section class="collect">
+    <div class="count">
+      수집된 미번역 라벨 <b id="count">0</b>개
+      <small id="count-detail"></small>
+    </div>
+    <div class="buttons">
+      <button id="export" disabled>JSON 내보내기</button>
+      <button id="clear" class="danger" disabled>초기화</button>
+    </div>
+  </section>
+
+  <section class="dict">
+    <div><span id="dict-status">사전 확인 중…</span><small id="dict-detail"></small></div>
+    <button id="dict-refresh">지금 확인</button>
+  </section>
+
+  <footer>설정은 열려 있는 Bitget 탭에 바로 반영됩니다.</footer>
+
+  <script src="../src/engine.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Bitget KO",
+  "version": "0.4.0",
+  "description": "Bitget 웹 거래 화면 UI 라벨을 용어 사전 기반으로 한국어 치환",
+  "permissions": ["storage"],
+  "host_permissions": ["https://raw.githubusercontent.com/*"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Bitget KO"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.bitget.com/*"],
+      "js": ["src/engine.js", "src/content.js"],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dictionary/ko.json"],
+      "matches": ["*://*.bitget.com/*"]
+    }
+  ]
+}
